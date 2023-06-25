@@ -381,17 +381,6 @@ impl<P: StoreParams> NetworkBehaviour for Bitswap<P> {
     >;
     type ToSwarm = BitswapEvent;
 
-    // fn new_handler(&mut self) -> Self::ConnectionHandler {
-    //     #[cfg(not(feature = "compat"))]
-    //     return self.inner.new_handler();
-    //     #[cfg(feature = "compat")]
-    //     ConnectionHandler::select(self.inner.new_handler(), OneShotHandler::default())
-    // }
-
-    // fn addresses_of_peer(&mut self, peer_id: &PeerId) -> Vec<Multiaddr> {
-    //     self.inner.addresses_of_peer(peer_id)
-    // }
-
     fn on_swarm_event(&mut self, event: FromSwarm<Self::ConnectionHandler>) {
         match event {
             FromSwarm::ConnectionClosed(ConnectionClosed {
@@ -688,6 +677,31 @@ impl<P: StoreParams> NetworkBehaviour for Bitswap<P> {
                 role_override,
             ),
             OneShotHandler::default(),
+        )
+    }
+
+    fn handle_pending_inbound_connection(
+        &mut self,
+        connection_id: ConnectionId,
+        local_addr: &Multiaddr,
+        remote_addr: &Multiaddr,
+    ) -> std::result::Result<(), libp2p::swarm::ConnectionDenied> {
+        self.inner
+            .handle_pending_inbound_connection(connection_id, local_addr, remote_addr)
+    }
+
+    fn handle_pending_outbound_connection(
+        &mut self,
+        connection_id: ConnectionId,
+        maybe_peer: Option<PeerId>,
+        addresses: &[Multiaddr],
+        effective_role: libp2p::core::Endpoint,
+    ) -> std::result::Result<Vec<Multiaddr>, libp2p::swarm::ConnectionDenied> {
+        self.inner.handle_pending_outbound_connection(
+            connection_id,
+            maybe_peer,
+            addresses,
+            effective_role,
         )
     }
 }
